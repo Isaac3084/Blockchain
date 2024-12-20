@@ -1,0 +1,22 @@
+{% extends 'NotaryApp/base.html' %}
+
+{% block content %}
+<div class="auth-form">
+    <h2 class="text-center mb-4">Login</h2>
+    <form method="post" action="{% url 'LoginAction' %}">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="t1" required>
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="t2" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Login</button>
+    </form>
+    <p class="text-center mt-3">
+        Don't have an account? <a href="{% url 'Signup' %}">Register here</a>
+    </p>
+</div>
+{% endblock %} 

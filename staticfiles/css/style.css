@@ -1,0 +1,26 @@
+.main {
+    width: 100%;
+    margin: 0 auto;
+}
+
+.header {
+    padding: 20px;
+    text-align: center;
+}
+
+.menu_nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.menu_nav ul li {
+    margin: 0 10px;
+}
+
+.menu_nav ul li a {
+    text-decoration: none;
+    color: #333;
+} 

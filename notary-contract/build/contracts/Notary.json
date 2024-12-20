@@ -1,0 +1,51 @@
+{
+  "contractName": "Notary",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "userCount",
+      "outputs": [{"name": "", "type": "uint256"}],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {"name": "uname", "type": "string"},
+        {"name": "pass", "type": "string"},
+        {"name": "phone", "type": "string"},
+        {"name": "emailid", "type": "string"},
+        {"name": "homes_address", "type": "string"}
+      ],
+      "name": "saveUser",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {"name": "uname", "type": "string"},
+        {"name": "fname", "type": "string"},
+        {"name": "ha", "type": "string"},
+        {"name": "sig", "type": "string"},
+        {"name": "dd", "type": "string"},
+        {"name": "k", "type": "string"}
+      ],
+      "name": "RegisterHash",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [{"name": "i", "type": "uint256"}],
+      "name": "deleteKey",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "networks": {
+    "11155111": {
+      "address": "0x2167D0F790f09df9d2C3f58A3600FF5C64a44a5a"
+    }
+  }
+} 

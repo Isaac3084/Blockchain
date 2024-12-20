@@ -1,0 +1,27 @@
+{% extends 'NotaryApp/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2 class="text-center mb-4">Add New Document</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form method="post" action="{% url 'AddNotaryAction' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="details" class="form-label">Document Details</label>
+                    <textarea class="form-control" id="details" name="t1" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="pin" class="form-label">PIN</label>
+                    <input type="text" class="form-control" id="pin" name="t2" required>
+                </div>
+                <div class="mb-3">
+                    <label for="document" class="form-label">Document</label>
+                    <input type="file" class="form-control" id="document" name="t3" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Add Document</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 
