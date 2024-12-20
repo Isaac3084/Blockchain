@@ -4,13 +4,16 @@
 <h2 class="text-center mb-4">Your Notarized Documents</h2>
 <div class="document-list">
     {% for doc in documents %}
-    <div class="card document-card">
+    <div class="card document-card mb-3">
         <div class="card-body">
             <h5 class="card-title">{{ doc.filename }}</h5>
             <p class="card-text">
                 <strong>Hash:</strong> {{ doc.document_hash|truncatechars:20 }}<br>
                 <strong>Date:</strong> {{ doc.timestamp|date:"F d, Y" }}<br>
-                <strong>Status:</strong> {% if doc.is_verified %}Verified{% else %}Pending{% endif %}
+                <strong>Status:</strong> {% if doc.is_verified %}Verified{% else %}Pending{% endif %}<br>
+                <strong>Public Key:</strong> <span class="text-muted">{{ doc.public_key|truncatechars:40 }}</span><br>
+                <strong>Private Key:</strong> <span class="text-danger">{{ doc.private_key|truncatechars:40 }}</span>
+                <small class="text-warning">(Keep secure!)</small>
             </p>
             <form method="post" action="{% url 'delete_notary' doc.id %}" class="d-inline">
                 {% csrf_token %}
@@ -22,4 +25,11 @@
     <div class="alert alert-info">No documents found.</div>
     {% endfor %}
 </div>
+
+<style>
+.qr-code {
+    max-width: 200px;
+    margin-top: 10px;
+}
+</style>
 {% endblock %} 

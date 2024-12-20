@@ -1,0 +1,45 @@
+{% extends 'NotaryApp/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2 class="text-center mb-4">Verify Document</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <form method="post" action="{% url 'verify_document_action' %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="pin" class="form-label">Document PIN</label>
+                            <input type="text" class="form-control" id="pin" name="pin" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="document" class="form-label">Upload Document</label>
+                            <input type="file" class="form-control" id="document" name="document" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Verify Document</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.qr-code {
+    max-width: 200px;
+    margin-top: 10px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+</style>
+{% endblock %} 

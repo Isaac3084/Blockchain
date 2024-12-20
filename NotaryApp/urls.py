@@ -12,4 +12,6 @@ urlpatterns = [
     path('viewnotary/', views.ViewNotary, name='ViewNotary'),
     path('delete_notary/<int:doc_id>/', views.delete_notary, name='delete_notary'),
     path('logout/', views.LogoutAction, name='LogoutAction'),
+    path('verify-document/', views.verify_document, name='verify_document'),
+    path('verify-document-action/', views.verify_document_action, name='verify_document_action'),
 ] 

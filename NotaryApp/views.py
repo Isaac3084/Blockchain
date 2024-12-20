@@ -6,6 +6,9 @@ from django.contrib.auth.decorators import login_required
 from django.core.files.storage import FileSystemStorage
 import hashlib
 from .models import NotaryDocument, UserProfile
+import qrcode
+from io import BytesIO
+import base64
 
 def index(request):
     return render(request, 'NotaryApp/index.html')
@@ -82,26 +85,58 @@ def AddNotaryAction(request):
         document = request.FILES.get('t3')
         
         if document:
-            fs = FileSystemStorage()
-            filename = fs.save(document.name, document)
-            
-            # Calculate document hash
-            hash_md5 = hashlib.md5()
-            for chunk in document.chunks():
-                hash_md5.update(chunk)
-            document_hash = hash_md5.hexdigest()
-            
-            # Save document
-            NotaryDocument.objects.create(
-                user=request.user,
-                filename=filename,
-                document_hash=document_hash,
-                pin=pin,
-                details=details
-            )
-            
-            messages.success(request, 'Document added successfully')
-            return redirect('ViewNotary')
+            try:
+                fs = FileSystemStorage()
+                filename = fs.save(document.name, document)
+                
+                # Calculate document hash
+                hash_md5 = hashlib.md5()
+                for chunk in document.chunks():
+                    hash_md5.update(chunk)
+                document_hash = hash_md5.hexdigest()
+                
+                # Create document record
+                notary_doc = NotaryDocument.objects.create(
+                    user=request.user,
+                    filename=filename,
+                    document_hash=document_hash,
+                    pin=pin,
+                    details=details
+                )
+                
+                # Generate key pair
+                notary_doc.generate_key_pair()
+                notary_doc.save()
+                
+                # Generate QR code with document info and public key
+                qr_data = f"""
+                Document Hash: {document_hash}
+                Public Key: {notary_doc.public_key[:50]}...
+                Timestamp: {notary_doc.timestamp}
+                """
+                
+                qr = qrcode.QRCode(version=1, box_size=10, border=5)
+                qr.add_data(qr_data)
+                qr.make(fit=True)
+                
+                # Create QR code image
+                qr_img = qr.make_image(fill_color="black", back_color="white")
+                buffer = BytesIO()
+                qr_img.save(buffer, format="PNG")
+                qr_code_base64 = base64.b64encode(buffer.getvalue()).decode()
+                
+                messages.success(request, 
+                    f'Document added successfully!<br>'
+                    f'Your Private Key (keep secure): {notary_doc.private_key[:50]}...<br>'
+                    f'Your Public Key: {notary_doc.public_key[:50]}...<br>'
+                    f'<img src="data:image/png;base64,{qr_code_base64}" class="qr-code">'
+                )
+                return redirect('ViewNotary')
+                
+            except Exception as e:
+                messages.error(request, f'Error processing document: {str(e)}')
+                return redirect('AddNotary')
+                
     return redirect('AddNotary')
 
 @login_required
@@ -124,3 +159,68 @@ def LogoutAction(request):
     logout(request)
     messages.success(request, 'Logged out successfully')
     return redirect('index')
+
+@login_required
+def verify_document(request):
+    return render(request, 'NotaryApp/verify_document.html')
+
+@login_required
+def verify_document_action(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        pin = request.POST.get('pin')
+        document = request.FILES.get('document')
+
+        # Verify user credentials
+        user = authenticate(username=request.user.username, password=password)
+        if not user or user.email != email:
+            messages.error(request, 'Invalid credentials')
+            return redirect('verify_document')
+
+        if document:
+            # Calculate document hash
+            hash_md5 = hashlib.md5()
+            for chunk in document.chunks():
+                hash_md5.update(chunk)
+            document_hash = hash_md5.hexdigest()
+
+            # Try to find the document
+            try:
+                doc = NotaryDocument.objects.get(
+                    user=request.user,
+                    document_hash=document_hash,
+                    pin=pin
+                )
+                doc.is_verified = True
+                doc.save()
+                messages.success(request, 'Document verified successfully!')
+                
+                # Generate verification QR code
+                qr = qrcode.QRCode(version=1, box_size=10, border=5)
+                qr_data = f"""
+                Document Hash: {document_hash}
+                Verified: Yes
+                Timestamp: {doc.timestamp}
+                Owner: {doc.user.email}
+                """
+                qr.add_data(qr_data)
+                qr.make(fit=True)
+                
+                # Create QR code image
+                qr_img = qr.make_image(fill_color="black", back_color="white")
+                buffer = BytesIO()
+                qr_img.save(buffer, format="PNG")
+                qr_code_base64 = base64.b64encode(buffer.getvalue()).decode()
+                
+                messages.success(request, 
+                    f'Verification QR Code:<br>'
+                    f'<img src="data:image/png;base64,{qr_code_base64}" class="qr-code">'
+                )
+                
+            except NotaryDocument.DoesNotExist:
+                messages.error(request, 'Document not found or PIN incorrect')
+        else:
+            messages.error(request, 'Please upload a document')
+            
+    return redirect('verify_document')

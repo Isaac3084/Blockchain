@@ -99,9 +99,32 @@ def install_requirements():
     """Install required packages"""
     try:
         print("\nInstalling required packages...")
-        subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt'])
+        # First upgrade pip
+        subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--upgrade', 'pip'])
+        
+        # Install packages one by one
+        with open('requirements.txt') as f:
+            packages = f.read().splitlines()
+        
+        for package in packages:
+            if package and not package.startswith('#'):
+                try:
+                    print(f"Installing {package}...")
+                    subprocess.check_call([
+                        sys.executable, 
+                        '-m', 
+                        'pip', 
+                        'install', 
+                        package,
+                        '--no-cache-dir'  # Added to avoid caching issues
+                    ])
+                except subprocess.CalledProcessError as e:
+                    print(f"Warning: Failed to install {package}: {str(e)}")
+                    continue
+        
         print("✓ Required packages installed")
         return True
+        
     except Exception as e:
         print(f"❌ Error installing requirements: {str(e)}")
         return False
